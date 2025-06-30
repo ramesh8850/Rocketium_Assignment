@@ -74,6 +74,40 @@ export const addImage = (req, res) => {
     }
 };
 
+export const updateElementPosition = (req, res) => {
+    try {
+        const elementId = req.params.id;
+        const { x, y } = req.body;
+
+        if (!canvasState) {
+            return res.status(400).json({ success: false, message: "Canvas not initialized" });
+        }
+
+        // Find element by id
+        const elementIndex = canvasState.elements.findIndex((el, idx) => {
+            // We don't have id stored in elements, so we use index as id
+            return idx.toString() === elementId;
+        });
+
+        if (elementIndex === -1) {
+            return res.status(404).json({ success: false, message: "Element not found" });
+        }
+
+        // Update element position
+        canvasState.elements[elementIndex].x = x;
+        canvasState.elements[elementIndex].y = y;
+
+        res.json({ success: true, message: "Element position updated" });
+    } catch (error) {
+        console.error('Update Element Position Error:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message,
+            errorDetails: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
+    }
+};
+
 // Export to PDF
 
 
@@ -94,9 +128,9 @@ export const exportToPDF = async (req, res) => {
         const filePath = join(exportsDir, filename);
 
         // 4. Debug paths
-        console.log('Root Directory:', __dirname);
-        console.log('Export Directory:', exportsDir);
-        console.log('Full File Path:', filePath);
+        // console.log('Root Directory:', __dirname);
+        // console.log('Export Directory:', exportsDir);
+        // console.log('Full File Path:', filePath);
 
         // 5. Ensure directory exists
         await fsPromises.mkdir(exportsDir, { recursive: true });

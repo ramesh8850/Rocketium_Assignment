@@ -7,6 +7,7 @@ import {
     addText,
     addImage,
     exportToPDF,
+    updateElementPosition,
 } from "../controllers/canvaController.js";
 
 const router = Router();
@@ -18,6 +19,7 @@ router.post("/canvas/rectangle", addRectangle);
 router.post("/canvas/circle", addCircle);
 router.post("/canvas/text", addText);
 router.post("/canvas/image", upload.single("image"), addImage);
+router.put("/canvas/element/:id/position", updateElementPosition);
 
 // PDF Export
 router.get("/export/pdf", exportToPDF);

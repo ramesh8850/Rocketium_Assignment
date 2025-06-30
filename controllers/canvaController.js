@@ -108,6 +108,50 @@ export const updateElementPosition = (req, res) => {
     }
 };
 
+export const updateElementText = (req, res) => {
+    try {
+        const elementId = req.params.id;
+        const { text, fontSize, bold, italic, underline } = req.body;
+
+        if (!canvasState) {
+            return res.status(400).json({ success: false, message: "Canvas not initialized" });
+        }
+
+        // Find element by id
+        const elementIndex = canvasState.elements.findIndex((el, idx) => {
+            return idx.toString() === elementId;
+        });
+
+        if (elementIndex === -1) {
+            return res.status(404).json({ success: false, message: "Element not found" });
+        }
+
+        // Update text properties
+        canvasState.elements[elementIndex].text = text;
+        if (fontSize !== undefined) {
+            canvasState.elements[elementIndex].fontSize = fontSize;
+        }
+        if (bold !== undefined) {
+            canvasState.elements[elementIndex].bold = bold;
+        }
+        if (italic !== undefined) {
+            canvasState.elements[elementIndex].italic = italic;
+        }
+        if (underline !== undefined) {
+            canvasState.elements[elementIndex].underline = underline;
+        }
+
+        res.json({ success: true, message: "Element text updated" });
+    } catch (error) {
+        console.error('Update Element Text Error:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message,
+            errorDetails: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
+    }
+};
+
 // Export to PDF
 
 
@@ -153,6 +197,46 @@ export const exportToPDF = async (req, res) => {
 
     } catch (error) {
         console.error('PDF Export Error:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message,
+            errorDetails: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
+    }
+};
+
+export const updateElementSize = (req, res) => {
+    try {
+        const elementId = req.params.id;
+        const { width, height, radius, fontSize } = req.body;
+
+        if (!canvasState) {
+            return res.status(400).json({ success: false, message: "Canvas not initialized" });
+        }
+
+        // Find element by id
+        const elementIndex = canvasState.elements.findIndex((el, idx) => {
+            return idx.toString() === elementId;
+        });
+
+        if (elementIndex === -1) {
+            return res.status(404).json({ success: false, message: "Element not found" });
+        }
+
+        // Update size properties based on element type
+        const element = canvasState.elements[elementIndex];
+        if (element.type === "rectangle" || element.type === "image") {
+            if (width !== undefined) element.width = width;
+            if (height !== undefined) element.height = height;
+        } else if (element.type === "circle") {
+            if (radius !== undefined) element.radius = radius;
+        } else if (element.type === "text") {
+            if (fontSize !== undefined) element.fontSize = fontSize;
+        }
+
+        res.json({ success: true, message: "Element size updated" });
+    } catch (error) {
+        console.error('Update Element Size Error:', error);
         res.status(500).json({
             success: false,
             message: error.message,

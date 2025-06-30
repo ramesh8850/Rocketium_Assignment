@@ -27,8 +27,27 @@ export const generatePDF = async (canvasState) => {
                         break;
                     case "text":
                         ctx.fillStyle = element.color;
-                        ctx.font = `${element.fontSize || 12}px ${element.fontFamily || "Helvetica"}`;
-                        ctx.fillText(element.text, element.x, element.y);
+                        // Use fontSize and font for text rendering, fallback to defaults
+                        const fontSize = element.fontSize || 12;
+                        const fontFamily = element.font || element.fontFamily || "Helvetica";
+                        let fontStyle = "";
+                        if (element.bold) fontStyle += "bold ";
+                        if (element.italic) fontStyle += "italic ";
+                        ctx.font = `${fontStyle}${fontSize}px ${fontFamily}`;
+                        // Adjust y position to account for font size (baseline)
+                        const yPos = element.y + fontSize;
+                        ctx.fillText(element.text, element.x, yPos);
+                        // Underline if needed
+                        if (element.underline) {
+                            const textWidth = ctx.measureText(element.text).width;
+                            const underlineY = yPos + 2;
+                            ctx.beginPath();
+                            ctx.moveTo(element.x, underlineY);
+                            ctx.lineTo(element.x + textWidth, underlineY);
+                            ctx.lineWidth = 1;
+                            ctx.strokeStyle = element.color;
+                            ctx.stroke();
+                        }
                         break;
                     case "image":
                         try {
